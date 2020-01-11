@@ -12,16 +12,20 @@ export interface Profile {
 };
 
 export const ProfileEditor: React.FC<Props> = (props) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
-  const [profileData, setProfileData] = React.useState<Profile>();
-  const [nameField, setNameField] = React.useState<string>();
-  const [nicknameField, setNickameField] = React.useState<string>();
+  const [name, setName] = React.useState('');
+  const [nickname, setNickname] = React.useState('');
 
   React.useEffect(() => {
-    getProfile(props.webId).then(setProfileData);
+    getProfile(props.webId).then(({ name, nickname }) => {
+      setIsLoaded(true);
+      setName(name || '');
+      setNickname(nickname || '');
+    });
   }, [props.webId]);
 
-  if (!profileData) {
+  if (!isLoaded) {
     return <>Loading&hellip;</>;
   }
 
@@ -30,13 +34,8 @@ export const ProfileEditor: React.FC<Props> = (props) => {
 
     setIsSaving(true);
 
-    updateProfile(
-      props.webId,
-      {
-        name: (typeof nameField === 'string') ? nameField : profileData.name,
-        nickname: (typeof nicknameField === 'string') ? nicknameField : profileData.nickname,
-      },
-    ).then(() => setIsSaving(false));
+    updateProfile(props.webId, { name, nickname })
+    .then(() => setIsSaving(false));
   };
 
   const buttonClass = isSaving ? 'is-loading button is-primary' : 'button is-primary';
@@ -49,8 +48,8 @@ export const ProfileEditor: React.FC<Props> = (props) => {
             <label htmlFor="name" className="label">Name:</label>
             <input
               id="name"
-              value={(typeof nameField === 'string') ? nameField : profileData.name}
-              onChange={(e) => setNameField(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               type="text"
               className="input"
               disabled={isSaving}
@@ -62,8 +61,8 @@ export const ProfileEditor: React.FC<Props> = (props) => {
             <label htmlFor="nickname" className="label">Nickname:</label>
             <input
               id="nickname"
-              value={(typeof nicknameField === 'string') ? nicknameField : profileData.nickname}
-              onChange={(e) => setNickameField(e.target.value)}
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
               type="text"
               className="input"
               disabled={isSaving}
