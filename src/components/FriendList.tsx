@@ -6,16 +6,13 @@ interface Props {
 };
 
 export const FriendList: React.FC<Props> = (props) => {
-  const [friendList, setFriendList] = React.useState<string[]>();
+  const [friendList, setFriendList] = React.useState<string[]>([]);
 
-  React.useEffect(() => {
-    data[props.webId].friends.toArray((f: any) => data[f].name.value)
-      .then(setFriendList);
-  }, [props.webId]);
-
-  if (!friendList) {
-    return <>Loading friends&hellip;</>;
-  }
+  React.useEffect(() => void (async () => {
+    let friends : string[] = [];
+    for await (const friend of data[props.webId].friends)
+      setFriendList(friends = [...friends, await data[friend].name.value]);
+  })(), [props.webId]);
 
   return <>
     <section className="section content">
