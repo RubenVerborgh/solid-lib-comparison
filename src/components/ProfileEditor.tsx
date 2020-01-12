@@ -1,6 +1,5 @@
 import React from 'react';
-import { getProfile } from '../services/getProfile';
-import { updateProfile } from '../services/updateProfile';
+import data from '@solid/query-ldflex';
 
 interface Props {
   webId: string;
@@ -17,25 +16,23 @@ export const ProfileEditor: React.FC<Props> = (props) => {
   const [name, setName] = React.useState('');
   const [nickname, setNickname] = React.useState('');
 
-  React.useEffect(() => {
-    getProfile(props.webId).then(({ name, nickname }) => {
-      setIsLoaded(true);
-      setName(name || '');
-      setNickname(nickname || '');
-    });
-  }, [props.webId]);
+  React.useEffect(() => void (async () => {
+    await data[props.webId].name.then(setName);
+    await data[props.webId].nick.then(setNickname);
+    setIsLoaded(true);
+  })(), [props.webId]);
 
   if (!isLoaded) {
     return <>Loading&hellip;</>;
   }
 
-  const onSubmit: React.FormEventHandler = (event) => {
+  const onSubmit: React.FormEventHandler = async (event) => {
     event.preventDefault();
 
     setIsSaving(true);
-
-    updateProfile(props.webId, { name, nickname })
-    .then(() => setIsSaving(false));
+    await data[props.webId].name.set(name);
+    await data[props.webId].nick.set(nickname);
+    setIsSaving(false);
   };
 
   const buttonClass = isSaving ? 'is-loading button is-primary' : 'button is-primary';

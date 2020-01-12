@@ -1,5 +1,5 @@
 import React from 'react';
-import { getFriendNames } from '../services/getFriendList';
+import data from '@solid/query-ldflex';
 
 interface Props {
   webId: string;
@@ -9,9 +9,8 @@ export const FriendList: React.FC<Props> = (props) => {
   const [friendList, setFriendList] = React.useState<string[]>();
 
   React.useEffect(() => {
-    getFriendNames(props.webId).then((friends) => {
-      setFriendList(friends);
-    });
+    data[props.webId].friends.toArray((f: any) => data[f].name.value)
+      .then(setFriendList);
   }, [props.webId]);
 
   if (!friendList) {
